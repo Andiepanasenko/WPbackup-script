@@ -12,10 +12,7 @@ s3 = boto3.resource('s3')
 # Set the desired multipart threshold value (13GB)
 GB = 1024 ** 3
 transfer_config = TransferConfig(multipart_threshold=13 * GB, max_concurrency=4)
-# def url_list(file_name):
-#     with open(file_name, "r") as file:
-#         l = file.readlines()
-#         return l
+
 
 def processing_backup(item, config):
     """ for item in lst:"""
