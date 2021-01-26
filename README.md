@@ -1,6 +1,8 @@
 # WPbackup-script
-'''
-Install required Linux packages
-'''
 
-[sudo] pip3 install -r req.txt
+```
+Install required Linux packages
+```
+```
+1. [sudo] pip3 install -r req.txt
+```
