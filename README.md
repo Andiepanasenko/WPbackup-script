@@ -3,5 +3,6 @@
 ```
 Install required Linux packages
 ```
-
-[sudo] pip3 install -r req.txt
+```
+1. [sudo] pip3 install -r req.txt
+```
