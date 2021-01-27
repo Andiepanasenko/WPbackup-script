@@ -51,6 +51,7 @@ def processing_backup(item, config):
         Key=folder + article,
         Filename=article
         )
+    os.remove(article)
     print("complete")
 
 
