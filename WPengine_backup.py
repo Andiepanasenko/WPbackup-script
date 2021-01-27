@@ -4,6 +4,7 @@ import boto3
 from boto3.s3.transfer import TransferConfig
 import re
 import sys
+import os
 
 
 lst = sys.argv[1:]
