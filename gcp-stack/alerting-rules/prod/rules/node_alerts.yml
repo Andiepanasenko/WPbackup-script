@@ -1,0 +1,171 @@
+groups:
+  - name: node_alerts
+    rules:
+
+#DISK
+
+    - alert: DiskWillFillIn2Hours
+      expr:  predict_linear(node_filesystem_free_bytes{job="ec2",cluster!~"jenkins-agents"}[1h], 2 * 3600) < 0
+      for: 5m
+      labels:
+        severity: critical 
+      annotations:
+        summary: "Disk will filling in 2 hours (instance nodeip {{ $labels.instance }})"
+        description: "Disk will filling in ( 2 hours left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+    - alert: UnusualDiskReadRate
+      expr: sum by (instance, nodeip, cluster, service, env) (irate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual disk read rate (instance nodeip {{ $labels.instance }})"
+        description: "Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - alert: UnusualDiskWriteRate
+      expr: sum by (instance, nodeip, cluster, service, env) (irate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual disk write rate (instance inodeip{{ $labels.instance }})"
+        description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - alert: DiskSpaceAlmostFull
+      expr:  node_filesystem_avail_bytes / node_filesystem_size_bytes * 100 <= 5 
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        description: 'Instance {{ $labels.instance }} of job {{ $labels.job }} has disk space less than 5% (current value: {{ printf "%.2f" $value }}%) for 15 minutes'
+        summary: 'Disk space almost exhausted' 
+
+    - alert: OutOfInodes
+      expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint ="/rootfs"} * 100 < 10
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Out of inodes (instance {{ $labels.instance }})"
+        description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    
+    - alert: TooManyOpenFileDescriptors
+      expr: 100 * (process_open_fds / process_max_fds) > 80
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Too many open file descriptors"
+        description: "{{ $labels.job }}: {{ $labels.namespace }}/{{ $labels.pod }} ({{$labels.instance }}) is using {{ $value }}% of the available file/socket descriptors."
+      
+#NETWORK
+
+# All host except FILESERVICE
+    - alert: UnusualNetworkThroughputIn
+      expr: sum by (instance, nodeip, cluster, service, env) (irate(node_network_receive_bytes_total{instance!="ppf-fileservice",device!~'br.*|veth.*'}[2m])) * 8 / 1024 / 1024 > 100
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual network throughput in (instance nodeip {{ $labels.instance }})"
+        description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+    - alert: UnusualNetworkThroughputOut
+      expr: sum by (instance, nodeip, cluster, service, env) (irate(node_network_transmit_bytes_total{instance!="ppf-fileservice",device!~'br.*|veth.*'}[2m])) * 8 / 1024 / 1024 > 100
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual network throughput out (instance nodeip {{ $labels.instance }})"
+        description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+# FILESERVICE  
+    - alert: UnusualNetworkThroughputIn_HighNetwork
+      expr: sum by (instance, nodeip, cluster, service, env) (irate(node_network_receive_bytes_total{instance="ppf-fileservice",device!~'br.*|veth.*'}[2m])) * 8 / 1024 / 1024 > 150
+      for: 15m
+      labels:
+        severity: warning
+        load_type: high
+      annotations:
+        summary: "Unusual network throughput in (instance nodeip {{ $labels.instance }})"
+        description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+# FILESERVICE network 
+    - alert: UnusualNetworkThroughputOut_HighLoad
+      expr: sum by (instance, nodeip, cluster, service, env) (irate(node_network_transmit_bytes_total{instance="ppf-fileservice",device!~'br.*|veth.*'}[2m])) * 8 / 1024 / 1024 > 150
+      for: 15m
+      labels:
+        severity: warning
+        load_type: high
+      annotations:
+        summary: "Unusual network throughput out (instance nodeip {{ $labels.instance }})"
+
+
+#MEMORY
+
+    - alert: OutOfMemory
+      expr: (node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100 < 8 
+      for: 20m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Out of memory (instance {{ $labels.instance }})"
+        description: "Node memory is filling up (< 8% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+    - alert: OutOfMemory
+      expr: (node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100 < 5
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Out of memory (instance {{ $labels.instance }})"
+        description: "Node memory is filling up (< 5% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+#CPU
+
+    - alert: CpuLoad
+      expr: 100 - (avg by (instance, nodeip, cluster, service, env) (irate(node_cpu_seconds_total{mode="idle",instance!="cinfra-prod-jenkins-server-qa-0"}[5m])) * 100) > 90
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU load (instance {{ $labels.instance }})"
+        description: "CPU load is > 90%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+#INSTANCE AVAILABILITY
+
+    - alert: WebServersDown
+      expr: avg_over_time(up{job="ec2", service="pdffiller", instance=~"web0.*"} [5m]) < 0.9
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Instance down (instance {{ $labels.instance }})"
+        description: "Instance down  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+    - alert: FormsCacheDown
+      expr: avg_over_time(up{job="ec2", service="pdffiller", instance=~"forms-cache.*"} [5m]) < 0.9
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Instance down (instance {{ $labels.instance }})"
+        description: "Instance down  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 
+
+    - alert: SupportServerDown
+      expr: avg_over_time(up{job="ec2", service="pdffiller", instance=~"support.*"} [5m]) < 0.9
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Instance down (instance {{ $labels.instance }})"
+        description: "Instance down  LABELS: {{ $labels }}"
+        runbook: https://grafana.infrateam.xyz/d/9CWBz0bik/node-exporter-metrics?orgId=1 

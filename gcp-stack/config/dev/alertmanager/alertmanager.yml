@@ -1,0 +1,37 @@
+global:
+  smtp_smarthost: 'smtp9-0.dev.int:52525'
+  smtp_from: 'developer@pdffiller.com'
+  slack_api_url: 'https://hooks.slack.com/services/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'
+
+route:
+  receiver: 'slack-notifications'
+  #receiver: 'email'
+  group_by: [alertname, datacenter, app]
+
+receivers:
+- name: 'email'
+  email_configs:
+  - to: 'zhylak.roman@pdffiller.team'
+    send_resolved: true
+    from: 'developer@pdffiller.com'
+    require_tls: false
+    text: 'mail-from-prometheus'
+
+- name: 'slack-notifications'
+  slack_configs:
+  - channel: '#gcp_dev_alert'
+    icon_url: https://avatars3.githubusercontent.com/u/3380462
+    send_resolved: true
+    title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] Monitoring Event Notification'
+    text: >-
+      {{ range .Alerts }}
+        *Alert:* {{ .Annotations.summary }} - `{{ .Labels.severity }}`
+        *Description:* {{ .Annotations.description }}
+        *Status:* {{ .Status | toUpper }}
+        *Starts At:* {{ .StartsAt }}
+        *Ends at:* {{ .EndsAt }}
+        *Graph:* <{{ .GeneratorURL }}|:chart_with_upwards_trend:> *Runbook:* <{{ .Annotations.runbook }}|:spiral_note_pad:>
+        *Details:*
+        {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+        {{ end }}
+      {{ end }}

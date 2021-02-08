@@ -1,0 +1,21 @@
+[tmp-test]
+test1 ansible_host="54.172.56.10" ansible_user="ubuntu" ansible_ssh_private_key_file="/home/crypto/skozlovskyi/.ssh/kozlovskyi.serhii@pdffiller.team_rsa"
+test2 ansible_host="34.227.148.193" ansible_user="ubuntu" ansible_ssh_private_key_file="/home/crypto/skozlovskyi/.ssh/kozlovskyi.serhii@pdffiller.team_rsa"
+
+[prod-web-servers]
+web02 ansible_host="34.238.9.40"
+web01 ansible_host="34.207.238.85"
+#web03 ansible_host="54.175.145.138"
+#web04 ansible_host="34.196.26.202"
+#web05 ansible_host="34.196.47.69"
+
+[prod-web-servers:vars]
+ansible_user="ubuntu"
+ssh_key_name="prod-c3-lb-web.pem"
+
+[marketing]
+marketing-forms-processor ansible_host="ec2-52-5-77-183.compute-1.amazonaws.com"
+
+[marketing:vars]
+ansible_user="ubuntu"
+ansible_ssh_private_key_file="$HOME/.ssh/prod-c3-lb-web.pem"

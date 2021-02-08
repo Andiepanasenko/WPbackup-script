@@ -1,0 +1,59 @@
+groups:
+
+- name: gcp-services
+  rules:
+
+  - alert: PrometheusInstanceDown
+    expr: up{job="prometheus"} == 0
+    for: 1m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: VictoriaMetricsDown
+    expr: up{job="victoria-metrics"} == 0
+    for: 1m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: PrometheusPushgatewayDown 
+    expr: up{job="pushgateway"} == 0 
+    for: 1m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: TelegrafExporterDown
+    expr: up{job="telegraf"} == 0
+    for: 1m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: StatsdExporterDown
+    expr: up{job="statsd"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: Cloudwatch_exporter_down
+    expr: up{job=~"aws_.*"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Cloudwatch exporter {{ $labels.job }} is down"
+      description: "Job {{ $labels.job }} is down."
+

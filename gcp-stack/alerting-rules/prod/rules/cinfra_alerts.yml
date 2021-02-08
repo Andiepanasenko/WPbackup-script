@@ -1,0 +1,41 @@
+groups:
+
+- name: cinfra
+  rules:
+
+  - alert: Jenkins_Server_Prod_Down
+    expr: up{job="jenkins"} == 0
+    for: 1m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: Jenkins_Health_Score
+    expr: jenkins_health_check_score{instance="jenkins-server-qa.infrateam.xyz:443",job="jenkins"} < 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} health score is below normal state"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: Grafana_Cinfra_Prod_Down
+    expr: up{job="grafana"} == 0
+    for: 1m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: Elasticsearch_Cinfra_Prod_Down
+    expr: up{job="elasticsearch"} == 0
+    for: 1m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+

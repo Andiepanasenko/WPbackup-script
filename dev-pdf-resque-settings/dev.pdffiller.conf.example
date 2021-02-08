@@ -1,0 +1,11 @@
+server {
+        listen  80;
+        server_name  devDEV_NUM.pdffillers.com;
+        root   /mnt/www/devDEV_NUM/public;
+        index  index.php;
+
+        error_log /var/log/nginx/devDEV_NUM_error.log;
+        #access_log /var/log/nginx/devDEV_NUM_access.log;
+
+        include /etc/nginx/conf.d/pdffiller-location;
+}

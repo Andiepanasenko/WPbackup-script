@@ -1,0 +1,5 @@
+[servers:vars]
+ansible_user="ubuntu"
+ssh_key_name="pdf.dev.pem"
+
+[servers]

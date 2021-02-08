@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+    app:
+        image: 1-generate-file-with-host:latest
+        volumes:
+            - ".:/app"
+        environment:
+            # # dev pdf #
+            # SSH_KEY: pdf.dev.pem
+            # AWS_ACCOUNT: pdffiller_dev
+            # BASTION_VPC: vpc-3835b05d
+            # USER: ubuntu
+
+            # # dev pdf #
+            # SSH_KEY: pdf.dev.pem
+            # AWS_ACCOUNT: pdffiller_dev
+            # BASTION_VPC: vpc-3835b05d
+            # USER: ec2-user
+
+            # dev pdf #
+            SSH_KEY: nodepdf.pem
+            AWS_ACCOUNT: pdffiller_dev
+            BASTION_VPC: vpc-3835b05d
+            USER: pfprod
+
+            # # prod pdf #
+            # SSH_KEY: pdf.prod.pem
+            # AWS_ACCOUNT: pdffiller_prod
+            # BASTION_VPC: vpc-2f7e294e
+            # USER: ubuntu
+
+            # # prod pdf #
+            # SSH_KEY: pdf.prod.pem
+            # AWS_ACCOUNT: pdffiller_prod
+            # BASTION_VPC: vpc-2f7e294e
+            # USER: ec2-user

@@ -1,0 +1,69 @@
+groups:
+  - name: "parse errors - elasticsearch_exporter"
+    rules:
+      - alert: "elasticsearch_exporter cluster_health have new errors P1-3"
+        expr: elasticsearch_cluster_health_up == 0
+        for: 5m
+        annotations:
+          summary: "elasticsearch_exporter have new errors"
+          description: 'Go to instance: "{{ $labels.instance }}" and check log for elasticsearch_exporter'
+          priority: "P2"
+
+      - alert: "elasticsearch_exporter cluster_health have new errors P4-5"
+        expr: elasticsearch_cluster_health_up == 0
+        for: 15m
+        annotations:
+          summary: "elasticsearch_exporter have new errors"
+          description: 'Go to instance: "{{ $labels.instance }}" and check log for elasticsearch_exporter'
+          priority: "P3"
+
+      - alert: "elasticsearch_exporter node_stats have new errors P1-3"
+        expr: elasticsearch_node_stats_up == 0
+        for: 5m
+        annotations:
+          summary: "elasticsearch_exporter have new errors"
+          description: 'Go to instance: "{{ $labels.instance }}" and check log for elasticsearch_exporter'
+          priority: "P2"
+
+      - alert: "elasticsearch_exporter node_stats have new errors P4-5"
+        expr: elasticsearch_node_stats_up == 0
+        for: 15m
+        annotations:
+          summary: "elasticsearch_exporter have new errors"
+          description: 'Go to instance: "{{ $labels.instance }}" and check log for elasticsearch_exporter'
+          priority: "P3"
+
+  - name: elasticsearch health alerts
+    rules:
+      - alert: "elasticsearch health is red P1-3"
+        expr: elasticsearch_cluster_health_status{color="red"} != 0
+        for: 1m
+        annotations:
+          summary: 'elasticsearch health is {{ $labels.color }}'
+          description: 'Check why elasticsearch health is {{ $labels.color }} - cluster: "{{ $labels.cluster }}"'
+          priority: "P2"
+
+      - alert: "elasticsearch health is red P4-5"
+        expr: elasticsearch_cluster_health_status{color="red"} != 0
+        for: 10m
+        annotations:
+          summary: 'elasticsearch health is {{ $labels.color }}'
+          description: 'Check why elasticsearch health is {{ $labels.color }} - cluster: "{{ $labels.cluster }}"'
+          priority: "P3"
+
+      - alert: "elasticsearch health is yellow P1-3"
+        expr: elasticsearch_cluster_health_status{color="yellow"} != 0
+        for: 6h
+        annotations:
+          summary: 'elasticsearch health is {{ $labels.color }}'
+          description: 'Check why elasticsearch health is {{ $labels.color }} - cluster: "{{ $labels.cluster }}"'
+          priority: "P3"
+
+      - alert: "elasticsearch health is yellow P4-5"
+        expr: elasticsearch_cluster_health_status{color="yellow"} != 0
+        for: 8h
+        annotations:
+          summary: 'elasticsearch health is {{ $labels.color }}'
+          description: 'Check why elasticsearch health is {{ $labels.color }} - cluster: "{{ $labels.cluster }}"'
+          priority: "P3"
+

@@ -1,0 +1,27 @@
+groups: 
+
+- name: autotest_alerts_pdffiller
+  rules:
+  - alert: Autotest Down
+    expr: autotest_status{job="pushgateway",app="pdffiller"} == 0
+    for: 1s
+    labels:
+      severity: warning
+      app: pdf
+    annotations:
+      summary: "Autotest {{ $labels.exported_job }} is down"
+      description: "{{ $labels.exported_job }} of job {{ $labels.job }} is down."
+
+
+- name: autotest_alerts_signnow
+  rules:
+  - alert: Autotest Down
+    expr: autotest_status{job="pushgateway",app="signnow"} == 0 
+    for: 1s
+    labels:
+      severity: warning
+      app: sn 
+    annotations:
+      summary: "Autotest {{ $labels.exported_job }} is down"
+      description: "{{ $labels.exported_job }} of job {{ $labels.job }} is down."
+

@@ -1,0 +1,14 @@
+groups:
+
+- name: container
+  rules:
+
+  - alert: java-workers-DOCKER
+    expr: time()-container_last_seen{container_label_com_amazonaws_ecs_cluster="cinfra-dev-javaworkers"}>=20
+    for: 1s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Container on ECS cluster {{$labels.instance}} down"
+      description: "{{$labels.name}} in cluster {{$labels.instance}} has been down for more than 20s"
+

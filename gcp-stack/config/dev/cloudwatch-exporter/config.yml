@@ -1,0 +1,451 @@
+tasks:
+ - name: aws_ec2
+   default_region: us-east-1
+   metrics:
+
+  #  CPUUtilization Max/Avg
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: CPUUtilization
+      aws_statistics: [Average]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: CPUUtilization
+      aws_statistics: [Maximum]
+
+# Network IN/OUT Max/Avg
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: NetworkOut
+      aws_statistics: [Average]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: NetworkIn
+      aws_statistics: [Average]
+
+# Network Packets IN/OUT Max/Avg
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: NetworkPacketsIn 
+      aws_statistics: [Average]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: NetworkPacketsIn 
+      aws_statistics: [Maximum]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: NetworkPacketsOut
+      aws_statistics: [Average]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: NetworkPacketsOut
+      aws_statistics: [Maximum]
+
+# Disk Read/Wriote IOPS Sum
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: DiskReadOps
+      aws_statistics: [Sum]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: DiskWriteOps
+      aws_statistics: [Sum]
+
+# EBS Read/Write OPS 
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: EBSReadOps
+      aws_statistics: [Sum]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: EBSWriteOps
+      aws_statistics: [Sum]
+
+# EBS Read/Write Bytes 
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: EBSReadBytes
+      aws_statistics: [Sum]
+
+    - aws_namespace: "AWS/EC2"
+      aws_dimensions: [InstanceId]
+      aws_dimensions_select:
+        InstanceId: [$_target]
+      aws_metric_name: EBSWriteBytes
+      aws_statistics: [Sum]
+
+
+# Cloudwatch RDS
+
+ - name: aws_rds
+   default_region: us-east-1
+   metrics:
+    - aws_namespace: AWS/RDS
+      aws_metric_name: CPUUtilization
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Maximum]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: DatabaseConnections
+      aws_dimensions: [DBInstanceIdentifier, DBClusterIdentifier]
+      aws_statistics: [Count]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: DatabaseConnections
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Sum]
+
+    - aws_metric_name: FreeStorageSpace
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: FreeableMemory
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Maximum]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: CPUCreditUsage
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: ReadIOPS
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: WriteIOPS
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: ReadLatency
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/RDS
+      aws_metric_name: WriteLatency
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+
+#Application ELB
+ - name: aws_alb
+   default_region: us-east-1
+   metrics:
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: HealthyHostCount
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_dimensions: [LoadBalancer]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: UnHealthyHostCount
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: TargetConnectionErrorCount
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: TargetResponseTime
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_statistics: [Average]
+      aws_extended_statistics: [p75, p90, p95]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: RequestCount
+      aws_dimensions: [LoadBalancer]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: HTTPCode_ELB_4XX_Count
+      aws_dimensions: [LoadBalancer]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: HTTPCode_ELB_5XX_Count
+      aws_dimensions: [LoadBalancer]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: HTTPCode_Target_2XX_Count
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: HTTPCode_Target_3XX_Count
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: HTTPCode_Target_4XX_Count
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ApplicationELB
+      aws_metric_name: HTTPCode_Target_5XX_Count
+      aws_dimensions: [TargetGroup, LoadBalancer]
+      aws_statistics: [Sum]
+
+
+#SQS
+
+ - name: aws_sqs
+   default_region: us-east-1
+   metrics:
+    - aws_namespace: AWS/SQS
+      aws_metric_name: ApproximateAgeOfOldestMessage
+      aws_dimensions: [QueueName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/SQS
+      aws_metric_name: ApproximateAgeOfOldestMessage
+      aws_dimensions: [QueueName]
+      aws_statistics: [Maximum]
+
+    - aws_namespace: AWS/SQS
+      aws_metric_name: NumberOfMessagesDeleted
+      aws_dimensions: [QueueName]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/SQS
+      aws_metric_name: NumberOfMessagesSent
+      aws_dimensions: [QueueName]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/SQS
+      aws_metric_name: NumberOfMessagesSent
+      aws_dimensions: [QueueName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/SQS
+      aws_metric_name: ApproximateNumberOfMessagesVisible
+      aws_dimensions: [QueueName]
+      aws_statistics: [Sum]
+
+#SNS
+ - name: aws_sns
+   default_region: us-east-1
+   metrics:
+    - aws_namespace: AWS/SNS
+      aws_metric_name: NumberOfMessagesPublished
+      aws_dimensions: [TopicName]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/SNS
+      aws_metric_name: NumberOfNotificationsDelivered
+      aws_dimensions: [TopicName]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/SNS
+      aws_metric_name: NumberOfNotificationsFailed
+      aws_dimensions: [TopicName]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/SNS
+      aws_metric_name: PublishSize
+      aws_dimensions: [TopicName]
+      aws_statistics: [Sum]
+
+
+# ELB Metrics
+ - name: aws_elb
+   default_region: us-east-1
+   metrics:
+    - aws_namespace: AWS/ELB
+      aws_metric_name: HealthyHostCount
+      aws_dimensions: [AvailabilityZone, LoadBalancerName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ELB
+      aws_metric_name: UnHealthyHostCount
+      aws_dimensions: [AvailabilityZone, LoadBalancerName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ELB
+      aws_metric_name: RequestCount
+      aws_dimensions: [AvailabilityZone, LoadBalancerName]
+      aws_statistics: [Sum]
+
+    - aws_namespace: AWS/ELB
+      aws_metric_name: Latency
+      aws_dimensions: [AvailabilityZone, LoadBalancerName]
+      aws_statistics: [Average]
+
+# ECS Metrics
+ - name: aws_ecs
+   default_region: us-east-1
+   metrics:
+    - aws_namespace: AWS/ECS
+      aws_metric_name: CPUUtilization
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ECS
+      aws_metric_name: CPUUtilization
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Maximum]
+
+    - aws_namespace: AWS/ECS
+      aws_metric_name: MemoryUtilization
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ECS
+      aws_metric_name: MemoryUtilization
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Maximum]
+
+    - aws_namespace: AWS/ECS
+      aws_metric_name: CPUReservation
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ECS
+      aws_metric_name: CPUReservation
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Maximum]
+
+    - aws_namespace: AWS/ECS
+      aws_metric_name: MemoryReservation
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ECS
+      aws_metric_name: MemoryReservation
+      aws_dimensions: [ClusterName, ServiceName]
+      aws_statistics: [Maximum]
+
+#SES Metrics
+
+ - name: aws_ses
+   default_region: us-east-1
+   metrics:
+    - aws_namespace: AWS/SES
+      aws_metric_name: Send
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Reject
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Bounce
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Complaint
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Delivery
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Open
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Click
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Rendering Failure
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Reputation.BounceRate
+
+    - aws_namespace: AWS/SES
+      aws_metric_name: Reputation.ComplaintRate
+
+#ElastiCache
+
+
+
+ - name: aws_elasticache
+   default_region: us-east-1
+   metrics:
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: CPUUtilization
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: NetworkBytesIn
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: NetworkBytesOut
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: FreeableMemory
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: BytesUsedForCache
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: CurrConnections
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: NewConnections
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: CacheHits
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: CacheMisses
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]
+
+    - aws_namespace: AWS/ElastiCache
+      aws_metric_name: ReplicationLag
+      aws_dimensions: [CacheClusterId]
+      aws_statistics: [Average]

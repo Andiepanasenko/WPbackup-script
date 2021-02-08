@@ -1,0 +1,37 @@
+- name: create backup file
+  become: yes
+  shell: "/bin/cp pdffiller-locations pdffiller-locations-backup-ansible "
+  args:
+    chdir: "/etc/nginx/conf.d"
+  when: backup == "yes"
+
+- name: create config file for location
+  tags:
+    - config
+  become: yes
+  template:
+    src: pdffiller-locations.j2
+    dest: "/etc/nginx/conf.d/pdffiller-locations"
+    force: yes
+
+- name: test if nginx configeration is correct
+  become: yes
+  shell: "/usr/sbin/nginx -t"
+
+- name: correct php version selected
+  become: yes
+  alternatives:
+    name: php
+    path: "{{ php_path }}"
+
+- name: reload nginx configuration
+  tags:
+    - reload
+  become: yes
+  service:
+    name: nginx
+    state: reloaded
+
+- name: restart supervisor
+  shell: "/etc/init.d/supervisor restart"
+  become: yes

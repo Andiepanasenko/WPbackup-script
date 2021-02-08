@@ -1,0 +1,26 @@
+{
+   "containerDefinitions": [ 
+      { 
+         "command": [
+            "bash",
+            "/app/docker/provision/migration.sh"
+        ],
+         "essential": true,
+         "image": null,
+         "logConfiguration": { 
+            "logDriver": "awslogs",
+            "options": null
+         },
+	 "environment": null,
+         "name": null
+      }
+   ],
+   "cpu": "256",
+   "memory": "512",
+   "family": null,
+   "networkMode": "awsvpc",
+   "executionRoleArn": null,
+   "requiresCompatibilities": [ 
+       "FARGATE" 
+    ]
+}

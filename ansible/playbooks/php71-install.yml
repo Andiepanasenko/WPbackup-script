@@ -1,0 +1,222 @@
+---
+- hosts: "{{ host }}"
+  any_errors_fatal: True
+
+  tasks:
+
+    # add repo
+    - name: "ADD php repo"
+      tags:
+        - packages
+      apt_repository:
+        repo: 'ppa:ondrej/php'
+        state: present
+      become: yes
+
+    # Install packages
+    - name: Install the common packages
+      tags:
+        - packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        dpkg_options: 'force-confold,force-confdef'
+        force: yes
+        install_recommends: no
+      become: yes
+      with_items:
+        - jq
+        - re2c
+        - libc6-dev
+        - libpcre3-dev
+        - libssh2-1-dev
+        - libssl-dev
+        - libyaml-dev
+        - lsb-release
+        - curl
+        - unzip
+        - wget
+        - less
+        - vim
+        - git
+        - re2c
+        - swig
+        - tmpreaper
+
+    - name: Install the build packages
+      tags:
+        - packages
+        - build
+      apt:
+        name: "{{ item }}"
+        state: present
+        dpkg_options: 'force-confold,force-confdef'
+        force: yes
+        install_recommends: no
+      become: yes
+      with_items:
+        - autoconf
+        - build-essential
+        - gcc
+        - software-properties-common
+
+    - name: Install the php packages
+      tags:
+        - packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        dpkg_options: 'force-confold,force-confdef'
+        force: yes
+        install_recommends: no
+      become: yes
+      with_items:
+        - php7.1-dba
+        - php7.1-dev
+        - php7.1-gmp
+        - php7.1-imagick
+        - php7.1-imap
+        - php7.1-mongodb
+        - php7.1-msgpack
+        - php7.1-odbc
+        - php7.1-pgsql
+        - php7.1-phalcon
+        - php7.1-pspell
+        - php7.1-recode
+        - php7.1-soap
+        - php7.1-tidy
+        - php7.1-fpm
+        - php7.1-xml
+        - php-amqp
+        - php-apcu-bc
+        - php-igbinary
+        - php-sodium
+        - php-memcache
+        - php-pear
+        - php-ssh2
+        - php-yaml
+        - php7.1-common
+        - php7.1-curl
+        - php7.1-gd
+        - php7.1-intl
+        - php7.1-mbstring
+        - php7.1-mcrypt
+        - php7.1-mysql
+        - php7.1-zip
+        - php7.1-json
+        - php7.1-opcache
+        - php7.1-cgi
+        - php7.1-cli
+        - php7.1-bcmath
+        - php7.1-redis
+        - php7.1-memcached
+
+    # Install composer
+    - name: Install composer
+      tags:
+        - composer
+      environment:
+        COMPOSER_HOME: "/root/composer"
+        PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/composer/vendor/bin"
+        COMPOSER_ALLOW_SUPERUSER: "1"
+      become: yes
+      shell: "mkdir $COMPOSER_HOME; curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer"
+
+    - name: set composer bin-file permisions
+      become: yes
+      tags:
+        - composer
+      file:
+        path: /usr/local/bin
+        mode: 0755
+
+    - name: Test if composer working
+      tags:
+        - composer
+      environment:
+        COMPOSER_HOME: "/root/composer"
+        PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/composer/vendor/bin"
+        COMPOSER_ALLOW_SUPERUSER: "1"
+      become: yes
+      shell: "composer --version --no-ansi"
+
+    # Build php custom modules
+    - name: ROLE BUILD CUSTOM MODULES
+      tags:
+        - modules_install
+        - build_php_modules
+      include_role:
+        name: "php71_build"
+
+    # Install php custom modules
+    - name: tmp folder for php
+      tags:
+        - modules_install
+        - get_artifacts
+      file:
+        dest: "/tmp/php71-install"
+        state: directory
+
+    - name: get artifacts from S3
+      become: yes
+      tags:
+        - modules_install
+        - get_artifacts
+      shell: "wget --no-check-certificate --no-proxy 'https://s3.amazonaws.com/pdffiller-install-packages/{{ s3_file_name }}' && tar -xvzf {{ s3_file_name }}"
+      args:
+        chdir: "/tmp/php71-install"
+
+    - name: provide libs for aerospike
+      become: yes
+      tags:
+        - modules_install
+        - customize_php
+      shell: "/bin/ln -sf /usr/lib/x86_64-linux-gnu/{{ item }} /usr/local/lib/{{ item }}"
+      with_items:
+        - libcrypto.a
+        - libcrypto.so
+
+    - name: copy custom_php_mods.ini
+      become: yes
+      tags:
+        - modules_install
+        - customize_php
+      shell: "cp -f /tmp/php71-install/artifacts/custom_php_mods.ini /etc/php/7.1/mods-available/custom_php_mods.ini"
+
+
+    - name: copy lua for aerospike
+      become: yes
+      tags:
+        - modules_install
+        - customize_php
+      shell: "cp -fr /tmp/php71-install/artifacts/aerospike /usr/local/"
+
+    - name: provide libs for aerospike
+      become: yes
+      tags:
+        - modules_install
+        - customize_php
+      shell: "ln -sf /etc/php/7.1/mods-available/custom_php_mods.ini /etc/php/7.1/{{ item }}/conf.d/custom_php_mods.ini"
+      with_items:
+        - cli
+        - fpm
+
+    - name: folder for php-extensions
+      become: yes
+      tags:
+        - modules_install
+        - customize_php
+      file:
+        dest: "/etc/php/7.1/php-extensions"
+        state: directory
+
+    - name: copy extensions
+      become: yes
+      tags:
+        - modules_install
+        - customize_php
+      shell: "find *.so | xargs -i /bin/bash -c 'cp -f {} /etc/php/7.1/php-extensions/{}'"
+      args:
+        chdir: "/tmp/php71-install/artifacts"
+      environment:
+        PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

@@ -1,0 +1,20 @@
+[program:resque-schedulerDEV_NUM]
+directory=/mnt/www/devDEV_NUM/3rdparty/php-resque-scheduler/
+command=php /mnt/www/devDEV_NUM/3rdparty/php-resque-scheduler/scheduler.php
+numprocs=1
+user=www-data
+environment=RESQUE_PHP="/mnt/www/devDEV_NUM/vendor/pdffiller/php-resque/lib/Resque.php",LOGGING=1,VVERBOSE=1,BLOCKING=0,COUNT=1,APP_INCLUDE="/mnt/www/devDEV_NUM/bootstrap/init.php",REDIS_BACKEND="dev-denise.d5xhkl.0001.use1.cache.amazonaws.com:6379",REDIS_BACKEND_DB=DB_NUM,PREFIX=DEV_NUM
+autostart=true
+autorestart=true
+stopsignal=QUIT
+process_name = %(program_name)s-%(process_num)s
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/resque_schedulerDEV_NUM_access.log
+stdout_logfile_maxbytes=1MB
+stdout_logfile_backups=5
+stdout_capture_maxbytes=1MB
+stderr_logfile=/var/log/supervisor/resque_schedulerDEV_NUM_error.log
+stderr_logfile_maxbytes=1MB
+stderr_logfile_backups=10
+stderr_capture_maxbytes=1MB
+

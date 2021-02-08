@@ -1,0 +1,427 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+  # Remote write configuration (for Graphite, OpenTSDB, or InfluxDB).
+remote_write:
+
+#VictoriaMetrics
+  - url: http://victoria-metrics.cinfra-rc.int:8428/api/v1/write
+    queue_config:
+      max_samples_per_send: 10000
+      max_shards: 100
+
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+        - prometheus-alert.cinfra-rc.int:9093
+
+rule_files:
+  - "./rules/*_alerts.yml"
+scrape_configs:
+
+- job_name: telegraf 
+  scrape_interval: 10s
+  metrics_path: /metrics
+  static_configs:
+  - targets: ['gcp-telegraf.cinfra-rc.int:9273']
+
+- job_name: 'ecs'
+  ec2_sd_configs:
+
+#cinfra-rc
+  - region: us-east-1
+    access_key: xxxx
+    secret_key: xxxx
+    port: 51680
+
+#as-rc
+  - region: us-east-1
+    access_key: xxxx
+    secret_key: xxxx
+    port: 51680
+
+
+  relabel_configs:
+    - source_labels: [__meta_ec2_tag_Name]
+      target_label: instance
+
+    - source_labels: [__address__]
+      regex: ^(.*):\d+$
+      replacement: '${1}'
+      target_label: "nodeip"
+
+    - source_labels: [__meta_ec2_tag_aws_autoscaling_groupName]
+      regex: (.*(prod|dpf|ppf|dev|as|sn|mr|cinfra|usl).*) 
+      action: keep
+
+- job_name: 'cadvisor'
+  ec2_sd_configs:
+
+#CINFRA-RC
+  - region: us-east-1
+    access_key: xxxx
+    secret_key: xxxx
+    port: 8081
+
+  relabel_configs:
+    - source_labels: [__meta_ec2_tag_Name]
+      target_label: instance
+
+    - source_labels: [__address__]
+      regex: ^(.*):\d+$
+      replacement: '${1}'
+      target_label: "nodeip"
+
+    - source_labels: [__meta_ec2_tag_aws_autoscaling_groupName]
+      regex: (.*(prod|dpf|ppf|dev|as|cinfra).*) 
+      action: keep
+
+# - job_name: 'cloudwatch-cinfra-dev'
+  # scrape_interval: 600s
+  # scrape_timeout: 90s
+  # honor_labels: true
+  # metrics_path: '/metrics'
+  # static_configs:
+  # - targets: ['10.200.8.56:9106']
+
+- job_name: 'ec2'
+  ec2_sd_configs:
+
+#cinfra-rc
+  - region: us-east-1
+    access_key: xxxx
+    secret_key: xxxx
+    port: 9100
+
+#as-rc
+  - region: us-east-1
+    access_key: xxxx
+    secret_key: xxxx
+    port: 9100
+
+  relabel_configs:
+
+    - source_labels: [__meta_ec2_tag_Name]
+      target_label: instance
+
+    - source_labels: [__address__]
+      regex: ^(.*):\d+$
+      replacement: '${1}'
+      target_label: "nodeip"
+
+    - source_labels: [__meta_ec2_availability_zone]
+      separator: ;
+      regex: (.*)
+      target_label: ec2_availability_zone
+      replacement: '${1}'
+      action: replace
+
+    - source_labels: [__meta_ec2_tag_Service]
+      target_label: service
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Cluster]
+      target_label: cluster
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Team]
+      target_label: team
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Company]
+      target_label: company
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Env]
+      target_label: env
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Department]
+      target_label: department
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_app]
+      target_label: app
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_instance_state]
+      target_label: state 
+    - regex: __meta_ec2_instance_state_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_instance_type]
+      target_label: ec2_type 
+
+    - source_labels: [__meta_ec2_vpc_id]
+      target_label: vpc_id 
+    - regex: __meta_ec2_vpc_id_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_Platform]
+      target_label: platform
+    - regex: __meta_ec2_Platform(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_instance_id]
+      target_label: instance_id
+
+
+- job_name: 'pushgateway'
+  static_configs:
+  - targets: ['prometheus-pushgateway.cinfra-rc.int:9091']
+
+- job_name: 'prometheus'
+  static_configs:
+  - targets: ['localhost:9090']
+
+- job_name: 'alertmanager'
+  static_configs:
+  - targets: ['prometheus-alert.cinfra-rc.int:9093']
+  metrics_path: '/metrics'
+
+- job_name: 'jenkins'
+  metrics_path: '/prometheus/'
+  scheme: https
+  static_configs:
+  - targets: ['jenkins-server-qa.infrateam-rc.xyz']
+
+
+- job_name: 'victoria-metrics'
+  metrics_path: '/metrics'
+  static_configs:
+  - targets: ['victoria-metrics.cinfra-rc.int:8428']
+
+- job_name: 'statsd'
+  metrics_path: '/metrics'
+  static_configs:
+  - targets: ['gcp-statsd.cinfra-rc.int.:9102']
+
+  relabel_configs:
+
+    - source_labels: [__address__]
+      regex: ^(\d+)\.(\d+)\.(\d+)\.(\d+).*
+      replacement: '${1}-${2}-${3}-${4}'
+      target_label: "instance"
+
+    - source_labels: [le]
+      regex: ^(\d+)\.(\d+).*
+      replacement: '${1}_${2}'
+      target_label: "le"
+
+#    - source_labels: [__address__]
+#      regex: (\d+)\.(\d+)\.(\d+)\.(\d+).*
+#      regex: ^(\d+)
+#      regex: ^(.*):\d+$
+#      replacement: "$1_$2"
+#      target_label: 'test'
+
+- job_name: 'grafana'
+  metrics_path: '/metrics'
+  static_configs:
+  - targets: ['grafana.cinfra-rc.int']
+
+- job_name: 'elasticsearch'
+  metrics_path: '/metrics'
+  static_configs:
+  - targets: ['mas-elastic.cinfra-rc.int:9108', 'elastic-logs.cinfra-rc.int:9108']
+
+
+#golang cloudwatch exporter
+- job_name: 'aws_ec2'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  ec2_sd_configs:
+
+#cinfra-rc
+    - region: us-east-1
+      access_key: xxxx
+      secret_key: xxxx
+
+#as-rc
+#  - region: us-east-1
+#    access_key: xxxx
+#    secret_key: xxxx
+
+  params:
+#    region: [us-east-1]
+  relabel_configs:
+    - source_labels: [job]
+      target_label: __param_task
+    - source_labels: [__meta_ec2_instance_id]
+      target_label: __param_target
+    - target_label: __address__
+      replacement: '172.17.0.1:9042'
+
+    - source_labels: [__meta_ec2_tag_Name]
+      target_label: instance
+
+    - source_labels: [__address__]
+      regex: ^(.*):\d+$
+      replacement: '${1}'
+      target_label: "nodeip"
+
+    - source_labels: [__meta_ec2_availability_zone]
+      separator: ;
+      regex: (.*)
+      target_label: ec2_availability_zone
+      replacement: '${1}'
+      action: replace
+
+    - source_labels: [__meta_ec2_tag_Service]
+      target_label: service
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Cluster]
+      target_label: cluster
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Team]
+      target_label: team
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Company]
+      target_label: company
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Env]
+      target_label: env
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_Department]
+      target_label: department
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_tag_app]
+      target_label: app
+    - regex: __meta_ec2_public_tag_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_instance_state]
+      target_label: state 
+    - regex: __meta_ec2_instance_state_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_instance_type]
+      target_label: ec2_type 
+
+    - source_labels: [__meta_ec2_vpc_id]
+      target_label: vpc_id 
+    - regex: __meta_ec2_vpc_id_(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_Platform]
+      target_label: platform
+    - regex: __meta_ec2_Platform(.*)
+      replacement: '${1}'
+      action: labelmap
+
+    - source_labels: [__meta_ec2_instance_id]
+      target_label: instance_id
+
+- job_name: 'aws_rds'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_rds]
+  static_configs:
+    - targets: [172.17.0.1:9042]
+
+
+- job_name: 'aws_elb'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_elb]
+  static_configs:
+    - targets: [172.17.0.1:9042]
+
+- job_name: 'aws_alb'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_alb]
+  static_configs:
+    - targets: [172.17.0.1:9042]
+
+- job_name: 'aws_sqs'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_sqs]
+  static_configs:
+    - targets: [172.17.0.1:9042]
+
+- job_name: 'aws_sns'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_sns]
+  static_configs:
+    - targets: [172.17.0.1:9042]
+
+- job_name: 'aws_ecs'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_ecs]
+  static_configs:
+    - targets: [172.17.0.1:9042]
+
+- job_name: 'aws_ses'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_ses]
+  static_configs:
+    - targets: [172.17.0.1:9042]
+
+- job_name: 'aws_elasticache'
+  scrape_interval: 60s
+  scrape_timeout: 20s
+  metrics_path: '/scrape'
+  params:
+    task: [aws_elasticache]
+  static_configs:
+    - targets: [172.17.0.1:9042]

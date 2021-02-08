@@ -1,0 +1,156 @@
+# Clean previous instalation
+- name: preclean
+  become: yes
+  tags:
+    - build
+    - artifacts
+  file:
+    dest: "{{ item }}"
+    state: absent
+  with_items:
+    - "/artifacts"
+    - "/tmp/aerospike-ext"
+    - "/tmp/pinba_extension"
+    - "/usr/share/zephir"
+    - "/tmp/zephir_parser"
+    - "/tmp/pcrypt"
+
+# Goreplace
+- name: "install goreplace"
+  become: yes
+  tags:
+    - goreplace
+    - build
+
+  get_url:
+    url: https://github.com/webdevops/go-replace/releases/download/{{ go_replace_version|default('1.1.2') }}/gr-64-linux
+    dest: /usr/local/bin/go-replace
+    mode: 0755
+
+
+# build custom modules
+- name: correct php version selected
+  become: yes
+  tags:
+    - build
+  alternatives:
+    name: php
+    path: "/usr/bin/php7.1"
+
+- name: copy make-scripts
+  become: yes
+  tags:
+    - artifacts
+    - build
+  copy:
+    src: installers/
+    dest: /installers/
+    directory_mode: yes
+
+- name: set 0755 to make scripts
+  become: yes
+  tags:
+    - build
+    - artifacts
+  shell: "find /installers/ -type f -regex '.+sh' | xargs chmod +x"
+
+- name: ensure artifact folder exist
+  become: yes
+  tags:
+    - build
+    - artifacts
+  file:
+    dest: "/artifacts"
+    state: directory
+
+- name: copy custom_php_mods.ini
+  become: yes
+  tags:
+    - build
+    - artifacts
+  copy:
+    src: custom_php_mods.ini
+    dest: /artifacts/custom_php_mods.ini
+
+- name: build artifacts
+  become: yes
+  tags:
+    - make_artifacts
+    - build
+  shell: "/installers/{{ item }}"
+  environment:
+    COMPOSER_HOME: "/root/composer"
+    PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/composer/vendor/bin"
+    COMPOSER_ALLOW_SUPERUSER: "1"
+    PINBA_SERVER: "127.0.0.1"
+    COMPOSER_HOME: "/root/composer"
+    FPM_MAX_CHILDREN: "32"
+    FPM_START_SERVERS: "6"
+    FPM_MIN_SPARE_SERVERS: "2"
+    FPM_MAX_SPARE_SERVERS: "8"
+    FPM_PROCESS_IDLE_TIMEOUT: "5"
+    FPM_MAX_REQUEST: "1024"
+    ZEPHIRDIR: "/usr/share/zephir"
+    ZEPHIR_VERSION: "0.9.9"
+    PCRYPT_VERSION: "v1.0.1"
+    ZEPHIR_PARSER_VERSION: "v1.0.3"
+    GITHUB_USER: "{{ GITHUB_USER }}"
+    GITHUB_TOKEN: "{{ GITHUB_TOKEN }}"
+  with_items:
+    - aerospike.sh
+    - pinba.sh
+    - zephir.sh
+    - zephir_parser.sh
+    - pcrypt.sh
+
+- archive:
+    path: /artifacts
+    dest: /artifacts.tgz
+  become: yes
+  tags:
+    - s3push
+    - build
+
+- name: create tmp folder
+  become: no
+  local_action:
+    module: file
+    dest: "~/tmp/{{ tmp_folder|default('php_artifacts') }}"
+    state: directory
+  tags:
+    - s3push
+    - build
+
+- name: fetch remote artifacts
+  become: no
+  fetch:
+    src: /artifacts.tgz
+    dest: "~/tmp/{{ tmp_folder|default('php_artifacts') }}"
+  register: art
+  tags:
+    - s3push
+    - build
+
+- name: push arts to s3
+  become: no
+  shell: "/usr/local/sbin/aws s3 cp {{ art.dest }} s3://pdffiller-install-packages/{{ s3_file_name }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --profile {{ aws_profile }}"
+  tags:
+    - s3push
+    - build
+  delegate_to: localhost
+
+- name: clean
+  tags:
+    - build
+  shell: "rm -rf /artifacts"
+  become: yes
+  environment:
+    PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+- name: local clean
+  tags:
+    - build
+  shell: "rm -rf ~/tmp/{{ tmp_folder|default('php_artifacts') }}"
+  become: no
+  environment:
+    PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

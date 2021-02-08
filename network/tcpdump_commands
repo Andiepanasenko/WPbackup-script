@@ -1,0 +1,9 @@
+# To monitor memcached traffic
+tcpdump  -s 65535 -A -ttt port 11211| cut -c 9- | grep -i '^get\|set' 2>&1 > /tmp/memcached.out
+
+#To monitor HTTP traffic including request and response headers and message body:
+tcpdump -A -s 0 'tcp port 80 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)'
+
+#To monitor HTTP traffic including request and response headers and message body from a particular source:
+tcpdump -A -s 0 'src example.com and tcp port 80 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)'
+

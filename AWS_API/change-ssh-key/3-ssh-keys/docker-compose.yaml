@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+    app:
+        image: 3-ssh-keys:latest
+        volumes:
+            - ".:/app"
+        environment:
+            # dev-pdf #
+            KEY_FOR_REPLACE: 'ssh-rsa AAAAB3NzYr'
+            NEW_KEY: 'ssh-rsa AAAA7J5Tz pdffiller.main.dev-2018.nov.20'

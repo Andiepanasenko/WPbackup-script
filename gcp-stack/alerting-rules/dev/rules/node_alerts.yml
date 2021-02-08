@@ -1,0 +1,93 @@
+groups:
+- name: node
+  rules:
+  - alert: DiskWillFillIn1Hour
+    expr: predict_linear(node_filesystem_free_bytes{job="ec2"}[1h], 1 * 3600) < 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Disk will filling in 1 hour (instance {{ $labels.instance }})"
+      description: "Disk will filling in ( 1 hour left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: UnusualNetworkThroughputIn
+    expr: sum by (instance, nodeip, cluster, service, env) (irate(node_network_receive_bytes_total{device!~'br.*|veth.*'}[2m])) * 8 / 1024 / 1024 > 100
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Unusual network throughput in (instance {{ $labels.instance }})"
+      description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: UnusualNetworkThroughputOut
+    expr: sum by (instance, nodeip, cluster, service, env) (irate(node_network_transmit_bytes_total{device!~'br.*|veth.*'}[2m])) * 8 / 1024 / 1024 > 100
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Unusual network throughput out (instance {{ $labels.instance }})"
+      description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      runbook: https://pdffiller.atlassian.net/wiki/spaces/DT/pages/619250037/Convert+AWS+EC2+PVM+to+HVM
+
+  - alert: UnusualDiskReadRate
+    expr: sum by (instance, nodeip, cluster, service, env) (irate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Unusual disk read rate (instance {{ $labels.instance }})"
+      description: "Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: UnusualDiskWriteRate
+    expr: sum by (instance, nodeip, cluster, service, env) (irate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Unusual disk write rate (instance {{ $labels.instance }})"
+      description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: OutOfInodes
+    expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint ="/rootfs"} * 100 < 10
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Out of inodes (instance {{ $labels.instance }})"
+      description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  
+  - alert: TooManyOpenFileDescriptors
+    expr: 100 * (process_open_fds / process_max_fds) > 80
+    for: 15m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Too many open file descriptors"
+      description: "{{ $labels.job }}: {{ $labels.namespace }}/{{ $labels.pod }} ({{$labels.instance }}) is using {{ $value }}% of the available file/socket descriptors."
+
+  - alert: CpuLoad
+    expr: 100 - (avg by(instance, nodeip, cluster, service, env) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU load (instance {{ $labels.instance }})"
+      description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: OutOfMemory
+    expr: (node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100 < 5
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Out of memory (instance {{ $labels.instance }})"
+      description: "Node memory is filling up (< 5% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+#  - alert: NodeExporterMetricsAlarmAvg
+#    expr: avg_over_time(up{job="ec2"}[5m]) < 0.9
+#    for: 1m
+#    labels:
+#      severity: info
+#    annotations:
+#      summary: 'Node Exporter does not return any metrics!'
+#      description: 'Host: {{$labels.host}}\n {{$labels.job}} exporter down!'

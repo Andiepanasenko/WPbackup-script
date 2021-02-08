@@ -1,0 +1,529 @@
+include /etc/nginx/conf.d/support-locations;
+
+location /nginx_status {
+
+        stub_status on;
+        access_log   off;
+        allow   127.0.0.1;
+        allow   54.225.228.16;
+        allow   10.0.0.0/8;
+        deny    all;
+}
+
+location ^~ /tests/ {
+    return 404;
+}
+
+location ^~ /include/ {
+	return 404;
+}
+
+location ^~ /3rdparty/ {
+        return 404;
+}
+
+location ^~ /vendor/ {
+	return 404;
+}
+
+location ~ /(composer\.json|composer\.lock|phpcs\.xml|codeception\.yml|circle\.yml) {
+    return 404;
+}
+
+#disable admin on front servs
+#location ^~ /33UMW1ZQ6goFeZ2o/ {
+#	return 404;
+#}
+
+location ^~ /jsfocr/ {
+    client_max_body_size 100M;
+         set $upstream_endpoint https://jsfocr.pdffiller.com;
+         proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller/ {
+    set $upstream_endpoint https://js3.pdffiller.com;
+        rewrite ^/jsfiller/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller-exp1/ {
+    set $upstream_endpoint https://js3_exp1.pdffiller.com;
+        rewrite ^/jsfiller-exp1/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller-exp2/ {
+    set $upstream_endpoint https://js3_exp2.pdffiller.com;
+        rewrite ^/jsfiller-exp2/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller-mob/ {
+    set $upstream_endpoint https://js3_mob.pdffiller.com;
+        rewrite ^/jsfiller-mob/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller-mob1/ {
+    set $upstream_endpoint https://js3_mob1.pdffiller.com;
+        rewrite ^/jsfiller-mob1/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+location /jsfiller-mob3/ {
+    set $upstream_endpoint https://js3-mob3.pdffiller.com;
+        rewrite ^/jsfiller-mob3/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /trueedit/ {
+    set $upstream_endpoint https://trueedit.pdffiller.com;
+        rewrite ^/trueedit/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller-desk/ {
+        set $upstream_endpoint https://jsfiller-desk.pdffiller.com;
+        rewrite ^/jsfiller-desk/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller-desk1/ {
+        set $upstream_endpoint https://jsfiller-desk1.pdffiller.com;
+        rewrite ^/jsfiller-desk1/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+location /jsfiller-desk2/ {
+        set $upstream_endpoint https://jsfiller-desk2.pdffiller.com;
+        rewrite ^/jsfiller-desk2/(.*) /$1 break;
+        proxy_pass $upstream_endpoint;
+}
+
+
+location ^~ /fs/ {
+
+    #autoindex on;
+
+    alias /var/pdffiller/projects/;
+
+    dav_methods PUT;
+    dav_ext_methods PROPFIND OPTIONS;
+
+    create_full_put_path  on;
+    dav_access group:rw user:rw all:r;
+
+    allow 109.195.94.148; #berkovsky
+    allow 127.0.0.1;
+    allow 192.168.1.0/24;
+    allow 10.0.0.0/8;
+    deny  all;
+}
+
+location ^~ /ssd/ {
+
+    #autoindex on;
+
+    alias /mnt/ssd_storage/;
+
+    dav_methods PUT;
+    dav_ext_methods PROPFIND OPTIONS;
+
+    create_full_put_path  on;
+    dav_access group:rw user:rw all:r;
+
+    allow 109.195.94.148; #berkovsky
+    allow 127.0.0.1;
+    allow 192.168.1.0/24;
+    allow 10.0.0.0/8;
+    deny  all;
+}
+
+location ^~ /ssd2/ {
+
+    alias  /mnt/ssd2_storage/;
+
+    dav_methods PUT;
+    dav_ext_methods PROPFIND OPTIONS;
+
+    create_full_put_path  on;
+    dav_access group:rw user:rw all:r;
+
+    include /etc/nginx/conf.d/allowed_ips.conf;
+    deny  all;
+}
+
+location ^~ /efs/ {
+
+alias /mnt/efs/projects/;
+
+dav_methods PUT;
+dav_ext_methods PROPFIND OPTIONS;
+
+create_full_put_path  on;
+dav_access group:rw user:rw all:r;
+
+include /etc/nginx/conf.d/allowed_ips.conf;
+deny all;
+}
+
+#-------secure files -----
+
+location /vault/ {
+        rewrite ^(.*)$ /vault/index.php last;
+}
+
+location ^~ /storage/ {
+        rewrite ^(.*)$ /storage.php last;
+}
+
+location ^~ /links/ {
+
+        alias /mnt/ssd_storage/links/;
+        internal;
+}
+
+location ^~ /files/ {
+
+        alias /var/pdffiller/projects/;
+        internal;
+}
+
+location ^~ /files_ssd/ {
+
+        alias /mnt/ssd_storage/;
+        internal;
+}
+
+location ^~ /files_ssd2/ {
+
+        alias /mnt/ssd2_storage/;
+        internal;
+}
+
+location ^~ /files_efs/ {
+
+        alias /mnt/efs/projects/;
+        internal;
+}
+
+location ^~ /files_tmp/ {
+        alias /mnt/storage/tmp/;
+        internal;
+}
+
+location ~* ^/download/(.*?)://(.*?)/(.*) {
+
+        #expires 1d;
+
+        proxy_cache_valid 200 301 302 304 1d;
+        proxy_cache_key "$request_method|$http_if_modified_since|$http_if_none_match|$host|$request_uri";
+        proxy_cache cache;
+        proxy_cache_valid 1d;
+        proxy_cache_valid 404 1m;
+        #proxy_cache_revalidate on;
+        proxy_cache_min_uses 1;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_cache_lock on;
+
+         add_header X-Cached $upstream_cache_status;
+
+        #resolver 10.0.0.2 valid=300s;
+        internal;
+
+        set $download_scheme $1;
+        set $download_uri $3;
+        set $download_host $2;
+
+        set $download_url $download_scheme://$download_host/$download_uri?$args;
+
+        proxy_set_header Host $download_host;
+        proxy_set_header Authorization '';
+
+        #proxy_set_header x-amz-server-side-encryption-customer-algorithm $arg_amz_encrypt_algorithm;
+        #proxy_set_header x-amz-server-side-encryption-customer-key $arg_amz_encrypt_key;
+        #proxy_set_header x-amz-server-side-encryption-customer-key-MD5 $arg_amz_encrypt_key_md5;
+
+        set $algorithm $upstream_http_x_amz_server_side_encryption_customer_algorithm;
+        set $key $upstream_http_x_amz_server_side_encryption_customer_key;
+        set $keyMD5 $upstream_http_x_amz_server_side_encryption_customer_key_MD5;
+
+        proxy_set_header x-amz-server-side-encryption-customer-algorithm $algorithm;
+        proxy_set_header x-amz-server-side-encryption-customer-key $key;
+        proxy_set_header x-amz-server-side-encryption-customer-key-MD5 $keyMD5;
+
+        proxy_hide_header      x-amz-id-2;
+        proxy_hide_header      x-amz-request-id;
+        proxy_hide_header      x-amz-version-id;
+        proxy_hide_header      Set-Cookie;
+        proxy_ignore_headers   "Set-Cookie";
+
+        #proxy_max_temp_file_size 0;
+
+        proxy_pass $download_url;
+
+}
+
+#-------EOF secure files -----
+
+location ~ ^/cron/ {
+    deny all;
+    return 403;
+}
+
+location ~ .*/\.git.* {
+   return 404;
+}
+
+#location ^~ /preview/ {
+#	access_log  off;
+#        error_log off;
+#	root /var/pdffiller;
+#}
+
+location ~* ^/preview/(.*) {
+
+  expires 7d;
+  access_log off;
+  add_header Cache-Control "public";
+
+  set $s3_bucket        'pdffiller-forms-preview.s3.amazonaws.com';
+  set $url_full         '$1';
+
+  proxy_http_version     1.1;
+  proxy_set_header       Host $s3_bucket;
+  proxy_set_header       Authorization '';
+  proxy_hide_header      x-amz-id-2;
+  proxy_hide_header      x-amz-request-id;
+  proxy_hide_header      Set-Cookie;
+  proxy_ignore_headers   "Set-Cookie";
+  proxy_buffering        on;
+  proxy_intercept_errors on;
+
+  proxy_cache_valid 200 301 302 304 10d;
+  proxy_cache_key "$request_method|$http_if_modified_since|$http_if_none_match|$host|$request_uri";
+  proxy_cache_min_uses 2;
+  proxy_cache cache;
+  proxy_cache_valid 10d;
+  proxy_cache_valid 404 1m;
+  proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+
+  error_page 404 403 = @preview404;
+
+  add_header X-Img-Cache $upstream_cache_status;
+
+  # resolver in main conf
+  proxy_pass             http://$s3_bucket/$url_full;
+}
+
+location @preview404 {
+    rewrite  .*  /images/forms/no_prev_dark.png  redirect;
+}
+
+location ^~ /projects/links/ {
+        deny all;
+        alias /mnt/ssd_storage/links/;
+}
+
+location ^~ /projects/mobile/ {
+        #deny all;
+        access_log  off;
+        error_log off;
+        root /var/pdffiller;
+}
+
+location ^~ /projects/ {
+	deny all;
+        access_log  off;
+        error_log off;
+        root /var/pdffiller;
+}
+
+location ^~ /tmp/ {
+	access_log  off;
+        error_log off;
+	root /mnt/storage;
+}
+
+location ^~ /images/success_stories/ {
+        root /mnt/storage;
+}
+
+location ^~ /images/landpages/video/ {
+        root /mnt/storage;
+}
+
+location ^~ /images/landings/ {
+        root /mnt/storage;
+}
+
+location ^~ /images/myforms_notification/ {
+        root /mnt/storage;
+}
+
+location ^~ /public/ {
+        root /var/pdffiller;
+}
+
+location = /styles.css {
+  rewrite ^(.*)$ /compress/css/styles.php last;
+}
+
+location = /main.css {
+  rewrite ^(.*)$ /compress/css/main.php last;
+}
+
+location = /css/forms.css {
+  rewrite ^(.*)$ /compress/css/forms.php last;
+}
+
+location = /scripts.js {
+  rewrite ^(.*)$ /compress/js/scripts.php last;
+}
+
+location = /scripts_forms.js {
+  rewrite ^(.*)$ /compress/js/scripts_forms.php last;
+}
+
+location = /main.js {
+  rewrite ^(.*)$ /compress/js/main.php last;
+}
+location ~ /analytics/visit_watch.js {
+  rewrite ^/analytics/visit_watch.js?(.*)$ /analytics/visit_watch.php?$1 last;
+}
+
+location /api {
+        rewrite ^/api/(.*)$ /api/index.php last;
+}
+location /api_v1 {
+        rewrite ^/api_v1/(.*)$ /api_v1/index.php last;
+}
+location /api_v2 {
+        rewrite ^/api_v2/(.*)$ /api_v2/index.php last;
+}
+location /api_v3 {
+        rewrite ^/api_v3/(.*)$ /api_v3/index.php last;
+}
+location ~ /images/mails2015 {
+  rewrite ^/images/mails2015/ScholarshipBanner(.*).png$ /cron_public/banner_query_counter.php last;
+}
+
+location ~ /profile {
+        rewrite ^/profile/([\d]+)\.(.*)$ /ava.php?id=$1&ext=$2 last;
+}
+
+	location ~ ^/pdffiller_counter_([\d]+)_([\d]+).gif {
+                rewrite ^/pdffiller_counter_([\d]+)_([\d]+).gif /flash/data/gif_counter.php?counter_id=$1&user_id=$2 last;
+        }
+	location ~ ^/flash/data/pics/(.*)/(.*)/(.*) {
+                rewrite ^/flash/data/pics/(.*)/(.*)/(.*) /flash/data/image.php?data=$1&hash=$2 last;
+        }
+
+	location / {
+		index index.php index.html index.htm;
+                if (!-e $request_filename){
+			rewrite ^/([\d]+) /index.php?router=/en/forms_directory/form_page/$1 last;
+                        rewrite ^(.*)$ /index.php;
+                }
+        }
+        location ~* ^.+\.(js|css|png|jpg|jpeg|gif|ico)$ {
+
+                set $cors_api '';
+
+                if ($http_origin ~* (developers\.pdffiller\.com|developers-rc.pdffiller\.com|developers-rc\d+\.pdffiller\.com)) {
+                        set $cors_api 'true';
+                }
+
+                if ($cors_api = 'true') {
+                        add_header 'Access-Control-Allow-Origin' "$http_origin";
+                        add_header 'Access-Control-Allow-Credentials' 'true';
+                }
+
+                access_log        off;
+                expires           max;
+        }
+	location ~ dump\.php$ {
+		include fastcgi_params;
+	        	fastcgi_pass   unix:{{ sock_path }};
+                fastcgi_index  index.php;
+
+                fastcgi_param  DOCUMENT_ROOT    $document_root/;
+                fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+                fastcgi_param  PATH_TRANSLATED  $document_root$fastcgi_script_name;
+
+                fastcgi_param  QUERY_STRING     $query_string;
+                fastcgi_param  REQUEST_METHOD   $request_method;
+                fastcgi_param  CONTENT_TYPE     $content_type;
+                fastcgi_param  CONTENT_LENGTH   $content_length;
+                fastcgi_intercept_errors        on;
+                fastcgi_ignore_client_abort     off;
+                fastcgi_connect_timeout 60;
+                fastcgi_send_timeout 180;
+                fastcgi_read_timeout 10800;
+                fastcgi_buffer_size 128k;
+                fastcgi_buffers 4 256k;
+                fastcgi_busy_buffers_size 256k;
+                fastcgi_temp_file_write_size 256k;
+	}
+        location ~ \.php$ {
+		rewrite ^/en/(.*)\.php$ /en/$1.htm last;
+                # fastcgi_split_path_info ^(.+\.php)(.*)$;
+
+		try_files $uri $uri/ /index.php?router=/en/404.htm;
+
+                include fastcgi_params;
+		        fastcgi_pass   unix:{{ sock_path }};
+                fastcgi_index  index.php;
+
+                fastcgi_param  DOCUMENT_ROOT    $document_root/;
+                fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+                fastcgi_param  PATH_TRANSLATED  $document_root$fastcgi_script_name;
+
+                fastcgi_param  QUERY_STRING     $query_string;
+                fastcgi_param  REQUEST_METHOD   $request_method;
+                fastcgi_param  CONTENT_TYPE     $content_type;
+                fastcgi_param  CONTENT_LENGTH   $content_length;
+                fastcgi_intercept_errors        on;
+                fastcgi_ignore_client_abort     off;
+                fastcgi_connect_timeout 60;
+                fastcgi_send_timeout 180;
+                fastcgi_read_timeout 180;
+                fastcgi_buffer_size 128k;
+                fastcgi_buffers 4 256k;
+                fastcgi_busy_buffers_size 256k;
+                fastcgi_temp_file_write_size 256k;
+        }
+	location = /favicon.ico {
+                log_not_found off;
+                access_log off;
+        }
+        location = /robots.txt {
+		alias /mnt/storage/robots.txt;
+                allow all;
+                log_not_found off;
+                access_log off;
+        }
+
+        location = /sitemap.xml {
+                alias /mnt/storage/sitemap.xml;
+                allow all;
+                log_not_found off;
+                access_log off;
+        }
+
+        location /sitemaps/ {
+                alias /mnt/storage/sitemaps/;
+                allow all;
+                log_not_found off;
+                access_log off;
+        }
+
+
+        ## Disable viewing .htaccess & .htpassword
+        location ~ /\.ht {
+                deny  all;
+        }
+	location /angular {
+		deny all;
+        	return 404;
+	}

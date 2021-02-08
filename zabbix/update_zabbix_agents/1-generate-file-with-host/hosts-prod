@@ -1,0 +1,181 @@
+[servers:vars]
+ansible_user="ubuntu"
+ssh_key_name="pdf.prod.pem"
+
+[servers]
+
+
+
+### dev instances
+# zabbix-proxy-for-dev.pdf.int
+###
+# ws2-dev1 ansible_host="10.0.2.61"
+# dev-api-docker-instance ansible_host="10.0.6.172"
+
+### dev instances
+# zabbix-proxy-for-dev.pdffiller.com
+###
+# api-dev ansible_host="52.3.204.82"
+# dev-pdf-export ansible_host="34.197.230.136"
+# mail-api-dev ansible_host="52.2.246.8"
+# denise_new_dev-pdf ansible_host="34.196.218.105"
+# mail-analytic-dev ansible_host="52.4.152.155"
+# ws2-dev ansible_host="52.23.109.71"
+# message-manager-dev ansible_host="52.21.11.246"
+# marketing-php7-dev ansible_host="52.55.155.177"
+# aerospike-dev01 ansible_host="52.2.97.24"
+# blog-dev ansible_host="52.3.188.43"
+
+
+### Поставив ручками. Нема необхідної залежності на хості. Встановлення - може все зламати.
+#lb-web ansible_host="10.0.3.179"
+###
+
+#################################################
+## Ходить по зовнішньому інтерфейсу (інше VPC) ##
+## zabbix-proxy1.pdffiller.com,zabbix-proxy2.pdffiller.com,zabbix-proxy3.pdffiller.com,zabbix-proxy4.pdffiller.com,zabbix-proxy5.pdffiller.com #
+#################################################
+# support-rc ansible_host="52.44.68.140"
+# api_wordpress ansible_host="52.2.136.33"
+# pdffiller.com.ua ansible_host="52.70.52.23"
+# shortener ansible_host="52.0.151.84"
+# nautilus1-2 ansible_host="52.86.123.159"
+# stresstest ansible_host="54.84.160.253"
+# NPM ansible_host="52.73.68.222"
+# nautilus1-2-db-ro ansible_host="52.7.57.74"
+# denise_perf ansible_host="34.234.104.138"
+# nautilus1-2-db ansible_host="52.7.196.2"
+# npm-updated ansible_host="18.208.75.224"
+# demo ansible_host="52.205.147.44"
+
+
+#################################################
+# zabbix-proxy1.pdf.int,zabbix-proxy2.pdf.int,zabbix-proxy3.pdf.int,zabbix-proxy4.pdf.int,zabbix-proxy5.pdf.int,
+
+# cron ansible_host="10.0.2.69"
+# prod-aerospike ansible_host="10.0.3.94"
+# preview-gen_hvm ansible_host="10.0.3.43"
+# prod-litmos-integration ansible_host="10.0.6.115"
+# blog ansible_host="10.0.1.23"
+
+# build-server-01 ansible_host="10.0.6.188"
+# netsuite-signnow-integration ansible_host="10.0.1.13"
+# docker-build-server-1 ansible_host="10.0.6.15"
+# log-server ansible_host="10.0.2.85"
+# message-manager-01 ansible_host="10.0.2.146"
+# teamcity-server ansible_host="10.0.6.112"
+
+# denise-prod-53-kinesis-test-host ansible_host="10.0.6.197"
+# Pinba ansible_host="10.0.3.34"
+# prod-hubspot-integration ansible_host="10.0.6.180"
+# vault ansible_host="10.0.2.116"
+# message-manager-02 ansible_host="10.0.3.113"
+# signnow-proxy ansible_host="10.0.6.25"
+# docker-build-server-2 ansible_host="10.0.6.109"
+# storage02 ansible_host="10.0.3.149"
+
+# solr ansible_host="10.0.6.90"
+# ws2-rc ansible_host="10.0.6.12"
+# ws2-experiment ansible_host="10.0.3.26"
+
+# microcatalog-backend ansible_host="10.0.6.27"
+# microcatalog-proxy ansible_host="10.0.6.142"
+# Grafana ansible_host="10.0.3.134"
+
+# alto ansible_host="10.0.1.96"
+# e-file-prod ansible_host="10.0.6.187"
+
+# jsfiller ansible_host="10.0.3.123"
+# jsfocr_-_jsfocr-web1 ansible_host="10.0.3.226"
+# jsfiller3-mob_-_jsfiller3-mob-web2 ansible_host="10.0.3.240"
+# jsfiller3_-_jsfiller3-web1 ansible_host="10.0.3.157"
+# jsftrue_-_jsftrue-web2 ansible_host="10.0.3.37"
+# jsfiller3-mob_-_jsfiller3-mob-web1 ansible_host="10.0.3.83"
+# jsfiller3_-_jsfiller3-web2 ansible_host="10.0.2.81"
+# jsftrue_-_jsftrue-web1 ansible_host="10.0.3.119"
+# websocket ansible_host="10.0.3.31"
+# websocket_-_websocket01 ansible_host="10.0.1.233"
+
+# support01 ansible_host="10.0.6.239"
+# prod-marketing-web01 ansible_host="10.0.2.93"
+# prod-marketing-microcatalog-proxy ansible_host="10.0.3.80"
+# marketing-sas-prod ansible_host="10.0.3.106"
+# marketing-forms-processor3 ansible_host="10.0.1.205"
+# marketing-prod-microsites ansible_host="10.0.6.199"
+# marketing-forms-processor ansible_host="10.0.1.226"
+
+# api-payments-server ansible_host="54.82.238.126"
+# api22 ansible_host="10.0.3.221"
+# Converter_Public_API ansible_host="10.0.6.214"
+# prod-pdftoxml-api ansible_host="10.0.6.100"
+# api21 ansible_host="10.0.3.67"
+# apirc ansible_host="10.0.2.58"
+# api02 ansible_host="10.0.3.137"
+# api01 ansible_host="10.0.3.254"
+# prod-api-slack-integration ansible_host="10.0.6.7"
+
+# haproxy01 ansible_host="10.0.3.189"
+# haproxy02 ansible_host="10.0.3.245"
+# haproxy03 ansible_host="10.0.2.186"
+# mylo-2 ansible_host="10.0.3.212"
+# mylo-5 ansible_host="10.0.2.155"
+# mylo-3 ansible_host="10.0.2.65"
+# mylo-4 ansible_host="10.0.2.213"
+
+# web01 ansible_host="10.0.3.81"
+# web02 ansible_host="10.0.3.102"
+# web03 ansible_host="10.0.1.90"
+# web04 ansible_host="10.0.2.37"
+# web05 ansible_host="10.0.1.247"
+
+# pdf-worker_-_pdfworker-3 ansible_host="10.0.3.165"
+# pdf-worker_-_pdfworker-10 ansible_host="10.0.3.105"
+# pdf-worker_-_pdfworker-1 ansible_host="10.0.3.58"
+# pdf-worker_-_pdfworker-11 ansible_host="10.0.3.199"
+# pdf-worker_-_pdfworker-4 ansible_host="10.0.3.5"
+# pdf-worker_-_pdfworker-9 ansible_host="10.0.3.244"
+# pdf-worker_-_pdfworker-2 ansible_host="10.0.3.45"
+# pdf-worker_-_pdfweb1 ansible_host="10.0.3.180"
+# pdf-worker_-_pdfworker-12 ansible_host="10.0.3.162"
+# pdf-worker_-_pdfweb2 ansible_host="10.0.3.69"
+# pdf-worker_-_pdfworker-7 ansible_host="10.0.3.120"
+# pdf-worker_-_pdfweb3 ansible_host="10.0.3.126"
+# pdf-worker_-_pdfworker-8 ansible_host="10.0.3.93"
+# pdf-worker_-_pdfworker-5 ansible_host="10.0.3.32"
+
+# pdf-worker-stage_-_pdfworker-8 ansible_host="10.0.3.30"
+# pdf-worker-stage_-_pdfweb2 ansible_host="10.0.3.87"
+# pdf-worker-stage_-_pdfworker-5 ansible_host="10.0.3.6"
+# pdf-worker-stage_-_pdfweb3 ansible_host="10.0.3.89"
+# pdf-worker-stage_-_pdfworker-9 ansible_host="10.0.3.151"
+# pdf-worker-stage_-_pdfworker-3 ansible_host="10.0.3.216"
+# pdf-worker-stage_-_pdfworker-2 ansible_host="10.0.3.63"
+# pdf-worker-stage_-_pdfworker-4 ansible_host="10.0.3.169"
+# pdf-worker-stage_-_pdfworker-11 ansible_host="10.0.3.19"
+# pdf-worker-stage_-_pdfworker-10 ansible_host="10.0.3.117"
+# pdf-worker-stage_-_pdfworker-7 ansible_host="10.0.3.158"
+# pdf-worker-stage_-_pdfweb1 ansible_host="10.0.3.54"
+# pdf-worker-stage_-_pdfworker-12 ansible_host="10.0.3.12"
+# pdf-worker-stage_-_pdfworker-1 ansible_host="10.0.3.251"
+
+# mail-analytic ansible_host="10.0.6.138"
+# mail-api01 ansible_host="10.0.3.52"
+# mail-api02 ansible_host="10.0.2.150"
+
+# mylo-tf-23 ansible_host="10.0.1.47"
+# mylo-tf-24 ansible_host="10.0.3.8"
+# mylo-tf-21 ansible_host="10.0.3.60"
+# mylo-tf-25 ansible_host="10.0.5.27"
+# mylo-tf-17 ansible_host="10.0.3.62"
+# mylo-tf-28 ansible_host="10.0.5.150"
+# mylo-tf-19 ansible_host="10.0.1.61"
+# mylo-tf-22 ansible_host="10.0.5.98"
+# mylo-tf-14 ansible_host="10.0.3.150"
+# mylo-tf-13 ansible_host="10.0.1.110"
+# mylo-tf-29 ansible_host="10.0.1.111"
+# mylo-tf-27 ansible_host="10.0.3.11"
+# mylo-tf-26 ansible_host="10.0.1.243"
+# mylo-tf-20 ansible_host="10.0.1.10"
+# mylo-tf-12 ansible_host="10.0.5.225"
+# mylo-tf-11 ansible_host="10.0.3.92"
+# mylo-tf-18 ansible_host="10.0.5.176"

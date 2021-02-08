@@ -1,0 +1,30 @@
+---
+- hosts: "{{ host }}"
+  serial: 100%
+  any_errors_fatal: True
+  vars:
+    ansible_ssh_private_key_file: "{{ ssh_key_folder|default('~/.ssh') }}/{{ ssh_key_name }}"
+
+  tasks:
+
+    - name: ROLE switch php7.1
+      tags:
+        - switch_wersion
+        - build_php_modules
+      include_role:
+        name: "switch_php_wersions"
+      vars:
+        sock_path: "/run/php/php7.1-fpm.sock"
+        php_path: "/usr/bin/php7.1"
+      when: php_version == "7.1"
+
+    - name: ROLE switch php5.6
+      tags:
+        - switch_wersion
+        - build_php_modules
+      include_role:
+        name: "switch_php_wersions"
+      vars:
+        sock_path: "/var/run/php/php5.6-fpm.sock"
+        php_path: "/usr/bin/php5.6"
+      when: php_version == "5.6"

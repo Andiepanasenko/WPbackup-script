@@ -1,0 +1,22 @@
+groups:
+
+- name: cinfra
+  rules:
+ 
+  - alert: Grafana_Cinfra_RC_Down
+    expr: up{job="grafana"} == 0
+    for: 1s
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: Elasticsearch_Cinfra_RC_Down
+    expr: up{job="elasticsearch"} == 0
+    for: 1s
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."

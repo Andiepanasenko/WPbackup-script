@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+    add_keys_to_consul:
+        build: .
+        volumes:
+            - ".:/app/"

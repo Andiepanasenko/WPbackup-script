@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+    app:
+        build: .
+        image: update-task-def-in-clusters:latest
+        volumes:
+            - ".:/app"

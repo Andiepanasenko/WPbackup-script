@@ -1,0 +1,79 @@
+groups:
+
+- name: gcp-services
+  rules:
+
+  - alert: PrometheusInstanceDown
+    expr: up{job="prometheus"} == 0
+    for: 1s
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: VictoriaMetricsDown
+    expr: up{job="victoria-metrics"} == 0
+    for: 1s
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: PrometheusPushgatewayDown 
+    expr: up{job="pushgateway"} == 0 
+    for: 1s
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: TelegrafExporterDown
+    expr: up{job="telegraf"} == 0
+    for: 1s
+    labels:
+      severity: critical 
+    annotations:
+      summary: "Instance {{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
+
+  - alert: Cloudwatch_exporter_down
+    expr: up{job=~"aws_.*"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Cloudwatch exporter {{ $labels.job }} is down"
+      description: "Job {{ $labels.job }} is down."
+ 
+#Prometheus configuration error
+  - alert: PrometheusConfigurationReload
+    expr: prometheus_config_last_reload_successful != 1
+    for: 1m
+    labels:
+      severity: error
+    annotations:
+      summary: "Common Infra Dev Prometheus configuration reload (instance {{ $labels.instance }})"
+      description: "Common Infra Dev Prometheus configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}" 
+ 
+  - alert: AlertmanagerConfigurationReload
+    expr: alertmanager_config_last_reload_successful != 1 
+    for: 1m
+    labels:
+      severity: error
+    annotations:
+      summary: "Common Infra Dev AlertManager configuration reload"
+      description: "Common Infra Dev AlertManager configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}" 
+
+  - alert: AlertmanagerNotificationsFailing
+    expr: rate(alertmanager_notifications_failed_total{integration=~"slack|email"}[1m]) > 0 
+    for: 1m
+    labels:
+      service: alertmanager
+      severity: critical
+    annotations:
+      summary: "Alertmanager is failing sending notications"
+      description: "Alertmanager is seeing errors for integration {{$labels.integration}}"
+ 

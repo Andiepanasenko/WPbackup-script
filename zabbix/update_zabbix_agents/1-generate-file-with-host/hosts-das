@@ -1,0 +1,11 @@
+[servers:vars]
+ansible_user="ubuntu"
+ssh_key_name="dev-airslate.pem"
+
+[servers]
+nodepdf-as-test_-_nodepdf-as-test-web1 ansible_host="10.55.32.31"
+das-terra-payment ansible_host="10.55.66.78"
+das-terragrunt-host ansible_host="10.55.229.96"
+das-terrahost ansible_host="10.55.34.163"
+das-20180511161400268600000002 ansible_host="10.55.252.67"
+nodepdf-as-test_-_pdfworker-as-test-worker1 ansible_host="10.55.39.43"

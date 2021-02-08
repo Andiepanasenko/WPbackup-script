@@ -1,0 +1,28 @@
+---
+- hosts: "servers"
+  any_errors_fatal: True
+  vars:
+    ansible_ssh_private_key_file: "{{ ssh_key_folder|default('~/.ssh') }}/{{ ssh_key_name }}"
+
+  tasks:
+     - name: Write the new ec2 instance host key to known hosts
+       connection: local
+       shell: "ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts"
+
+     - name: include vars
+       include_vars: vars.yaml
+
+     - name: Replace or add key
+       lineinfile:
+         dest: ~/.ssh/authorized_keys
+         regexp: '^{{ ssh_key_for_replace }}.*$'
+         line: '{{ new_ssh_key }}'
+         backup: yes
+
+     - name: Replace developer key
+       replace:
+         dest: /home/developer/.ssh/authorized_keys
+         regexp: '^{{ ssh_key_for_replace }}.*$'
+         replace: '{{ new_ssh_key }}'
+         become: yes
+         backup: yes

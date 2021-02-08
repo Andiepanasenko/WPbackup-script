@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+    app:
+        image: 2-add-sg-for-instances:latest
+        environment:
+            # dev-pdf #
+            SECURITY_GROUP: "{'vpc-3835b05d': 'sg-0e0f316b'}"
+
+            # # prod-pdf #
+            # SECURITY_GROUP: "{'vpc-2c587757': 'sg-53b1171b','vpc-17ef8f72': 'sg-6215d906','vpc-a93e81cc': 'sg-864d66e3','vpc-e7cc1283': 'sg-b645b3d0','vpc-2f7e294e': 'sg-b929aed6'}"

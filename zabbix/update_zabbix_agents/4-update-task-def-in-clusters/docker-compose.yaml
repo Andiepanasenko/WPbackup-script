@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+    app:
+        image: 4-update-task-def-in-clusters:latest
+        volumes:
+            - ".:/app"
+        environment:
+            ZBX_DEBUGLEVEL: 1
+
+            # # dev pdffiller #
+            # ZBX_METADATA: Docker Linux ECS us-east-1 dev-zabbix-agent
+            # ZBX_SERVER_HOST: zabbix-proxy1.dev.int,zabbix-proxy2.dev.int,zabbix-proxy3.dev.int,zabbix-proxy4.dev.int,zabbix-proxy5.dev.int
+
+            # # prod pdffiller #
+            # ZBX_METADATA: Docker Linux ECS us-east-1 prod-zabbix-agent
+            # ZBX_SERVER_HOST: zabbix-proxy1.pdf.int,zabbix-proxy2.pdf.int,zabbix-proxy3.pdf.int,zabbix-proxy4.pdf.int,zabbix-proxy5.pdf.int
+
+            # dev airslate #
+            ZBX_METADATA: Docker Linux ECS us-east-1 das-zabbix-agent
+            ZBX_SERVER_HOST: zabbix-proxy1.as-dev.int,zabbix-proxy2.as-dev.int,zabbix-proxy3.as-dev.int,zabbix-proxy4.as-dev.int,zabbix-proxy5.as-dev.int,10.55.0.0/16
