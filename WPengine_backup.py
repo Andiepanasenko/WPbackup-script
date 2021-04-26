@@ -74,7 +74,7 @@ def delete_expired():
         )
     )
 
-    if bucket_objects:
+    if bucket_objects_to_delete:
         s3_client.delete_objects(
             Bucket=bucket_name,
             Delete={'Objects': bucket_objects_to_delete}
