@@ -5,6 +5,7 @@ from boto3.s3.transfer import TransferConfig
 import re
 import sys
 import os
+import datetime
 
 
 lst = sys.argv[1:]
@@ -12,6 +13,8 @@ s3 = boto3.resource('s3')
 
 GB = 1024 ** 3
 transfer_config = TransferConfig(multipart_threshold=5 * GB, max_concurrency=4)
+bucket_name = 'mr-prod-wpengine-backup-20201022121325811200000001'
+min_date = datetime.datetime.now() - datetime.timedelta(days=30)
 
 
 def processing_backup(item, config):
@@ -47,7 +50,7 @@ def processing_backup(item, config):
 
     print(article)
     s3.meta.client.upload_file(
-        Bucket='mr-prod-wpengine-backup-20201022121325811200000001',
+        Bucket=bucket_name,
         Config=config,
         Key=folder + article,
         Filename=article
@@ -56,6 +59,33 @@ def processing_backup(item, config):
     print("complete")
 
 
-for i in lst:
-    processing_backup(i, transfer_config)
+def delete_expired():
+    """delete old back_up from s3"""
+    s3_client = boto3.client('s3')
+    bucket_objects = s3_client.list_objects(Bucket=bucket_name)['Contents']
+
+    bucket_objects_to_delete = list(
+        map(
+            lambda y: {'Key': y['Key']},
+            filter(
+                lambda x: '.zip' in x['Key'] and x['LastModified'].date() < min_date.date(),
+                bucket_objects
+            )
+        )
+    )
+
+    if bucket_objects_to_delete:
+        s3_client.delete_objects(
+            Bucket=bucket_name,
+            Delete={'Objects': bucket_objects_to_delete}
+        )
+
+
+if __name__ == "__main__":
+    for i in lst:
+        processing_backup(i, transfer_config)
+
+    delete_expired()
+
+
 
